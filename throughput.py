@@ -1,4 +1,5 @@
 import lsst.afw.detection as afwDetect
+import lsst.ip.isr as isr
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mplcolors
@@ -24,6 +25,41 @@ def remove_figure(fig):
     fig.clf()       # clear the figure
     plt.close(fig)  # close the figure
     gc.collect()    # call the garbage collector
+
+def isr_ccob_exposure(exp, dark_exp):
+    assemblyTask = isr.AssembleCcdTask()
+    overscanTask = isr.IsrTask()
+
+    overscanTask.config.doOverscan = True
+    overscanTask.config.doAssembleIsrExposures =True
+    overscanTask.config.doAssembleCcd = True
+    overscanTask.config.assembleCcd.doTrim = True
+    overscanTask.config.doApplyGains = True
+    overscanTask.config.doBias = False
+    overscanTask.config.doLinearize = False
+    overscanTask.config.doDark = True
+    overscanTask.config.doFlat = False
+    overscanTask.config.doDefect = False
+
+    exp_assembled = overscanTask.run(exp_assembled, dark=dark_exp).exposure
+
+def isr_dark_exposure(dark_exp_raw):
+    assemblyTask = isr.AssembleCcdTask()
+    overscanTask = isr.IsrTask()
+
+    overscanTask.config.doOverscan = True
+    overscanTask.config.doAssembleIsrExposures =True
+    overscanTask.config.doAssembleCcd = True
+    overscanTask.config.assembleCcd.doTrim = True
+    overscanTask.config.doApplyGains = True
+    overscanTask.config.doBias = False
+    overscanTask.config.doLinearize = False
+    overscanTask.config.doDark = False
+    overscanTask.config.doFlat = False
+    overscanTask.config.doDefect = False
+
+    dark_exp_assembled = dark_exp_raw.clone()
+    dark_exp_assembled = overscanTask.run(dark_exp_assembled).exposure
 
 def footprint_signal_spans(im, footprint):
     spans = footprint.getSpans()
@@ -73,3 +109,4 @@ def get_spots_counts(exp_assembled, threshold_adu=100,minarea=30000, makePlot=Fa
         print(signals[indx])
     return signals[indx]
     
+def get_spots_counts_from_raw(exp_assembled, threshold_adu=100,minarea=30000, makePlot=False):
