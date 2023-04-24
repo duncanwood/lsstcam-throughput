@@ -41,7 +41,7 @@ def isr_ccob_exposure(exp, dark_exp):
     overscanTask.config.doFlat = False
     overscanTask.config.doDefect = False
 
-    exp_assembled = overscanTask.run(exp_assembled, dark=dark_exp).exposure
+    return overscanTask.run(exp, dark=dark_exp).exposure
 
 def isr_dark_exposure(dark_exp_raw):
     assemblyTask = isr.AssembleCcdTask()
@@ -58,8 +58,7 @@ def isr_dark_exposure(dark_exp_raw):
     overscanTask.config.doFlat = False
     overscanTask.config.doDefect = False
 
-    dark_exp_assembled = dark_exp_raw.clone()
-    dark_exp_assembled = overscanTask.run(dark_exp_assembled).exposure
+    return overscanTask.run(dark_exp_raw).exposure
 
 def footprint_signal_spans(im, footprint):
     spans = footprint.getSpans()
@@ -109,4 +108,6 @@ def get_spots_counts(exp_assembled, threshold_adu=100,minarea=30000, makePlot=Fa
         print(signals[indx])
     return signals[indx]
     
-def get_spots_counts_from_raw(exp_assembled, threshold_adu=100,minarea=30000, makePlot=False):
+def get_spots_counts_from_raw(exp_raw, dark, threshold_adu=100,minarea=30000, makePlot=False):
+    exp_assembled = isr_ccob_exposure(exp_raw, dark)
+    return get_spots_counts(exp_assembled, threshold_adu=threshold_adu,minarea=minarea, makePlot=makePlot)
