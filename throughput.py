@@ -77,6 +77,8 @@ def footprint_center_of_mass(im, footprint):
     total = 0
     for span in spans:
         span_y = span.getY()
+        if span_y >= im.array.shape[0]: break
+        if span_y < 0 : continue
         x_range = np.arange(max(0,span.getX0()),span.getX1()+1)
         partial_sums_x.append(np.sum(x_range * im.array[span_y,x_range]))
         partial_sums_y.append(np.sum(im.array[span_y,x_range]) * span_y)
