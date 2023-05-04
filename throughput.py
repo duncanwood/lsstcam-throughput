@@ -79,7 +79,7 @@ def footprint_center_of_mass(im, footprint):
         span_y = span.getY()
         if span_y >= im.array.shape[0]: break
         if span_y < 0 : continue
-        x_range = np.arange(max(0,span.getX0()),span.getX1()+1)
+        x_range = np.arange(max(0,span.getX0()),min(im.array.shape[1], span.getX1()+1))
         partial_sums_x.append(np.sum(x_range * im.array[span_y,x_range]))
         partial_sums_y.append(np.sum(im.array[span_y,x_range]) * span_y)
         total += np.sum(im.array[span_y, x_range])
@@ -88,7 +88,7 @@ def footprint_center_of_mass(im, footprint):
     center_of_mass = np.array((center_x, center_y))
     return center_of_mass, total
 
-def get_spots_counts(exp_assembled, threshold_adu=10, minarea=30000, make_plot=False, force_circle=False):
+def get_spots_counts(exp_assembled, threshold_adu=10, minarea=30000, maxarea=4000000, make_plot=False, force_circle=False):
     
     im = exp_assembled.getImage()
 
@@ -97,7 +97,7 @@ def get_spots_counts(exp_assembled, threshold_adu=10, minarea=30000, make_plot=F
     
     fpset = afwDetect.FootprintSet(im, threshold)
     culled_fpset = [fp for fp in
-                        fpset.getFootprints() if fp.getArea() > minarea  ]
+                        fpset.getFootprints() if (fp.getArea() > minarea and fp.getArea() < maxarea ) ]
 
     
     if force_circle:
