@@ -27,18 +27,19 @@ def remove_figure(fig):
     plt.close(fig)  # close the figure
     gc.collect()    # call the garbage collector
 
-def isr_ccob_exposure(exp, dark_exp):
+def isr_ccob_exposure(exp, dark_exp=None):
     assemblyTask = isr.AssembleCcdTask()
     overscanTask = isr.IsrTask()
 
     overscanTask.config.doOverscan = True
+    overscanTask.config.overscan.fitType = 'MEDIAN_PER_ROW'
     overscanTask.config.doAssembleIsrExposures =True
     overscanTask.config.doAssembleCcd = True
     overscanTask.config.assembleCcd.doTrim = True
     overscanTask.config.doApplyGains = True
     overscanTask.config.doBias = False
     overscanTask.config.doLinearize = False
-    overscanTask.config.doDark = True
+    overscanTask.config.doDark = (dark_exp is not None)
     overscanTask.config.doFlat = False
     overscanTask.config.doDefect = False
 
@@ -85,7 +86,7 @@ def footprint_center_of_mass(im, footprint):
     center_of_mass = np.array((center_x, center_y))
     return center_of_mass, total
 
-def get_spots_counts(exp_assembled, threshold_adu=100, minarea=30000, make_plot=False, force_circle=False):
+def get_spots_counts(exp_assembled, threshold_adu=10, minarea=30000, make_plot=False, force_circle=False):
     
     im = exp_assembled.getImage()
 
